@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Pencil, Check, Clock, Trash2, Send } from 'lucide-react';
+import { ArrowLeft, Pencil, Check, Clock, Trash2, Send, Smile } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
   const { user, token } = useAuth();
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(initialDisplayName);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -111,7 +113,7 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0b141a] font-sans text-[#e9edef]">
+    <div className="flex flex-col h-[100dvh] bg-[#0b141a] font-sans text-[#e9edef] overflow-hidden">
       {/* Header */}
       <header className="flex items-center justify-between p-3 bg-[#202c33] border-b border-[#2a3942] sticky top-0 z-10 shadow-sm">
         <div className="flex items-center space-x-4">
@@ -205,11 +207,29 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
       </main>
 
       {/* Input Area */}
-      <footer className="p-3 bg-[#202c33] flex items-center space-x-2">
-        <form onSubmit={handleSendMessage} className="flex-1 flex items-center space-x-2">
+      <footer className="p-3 bg-[#202c33] relative">
+        {showEmojiPicker && (
+          <div className="absolute bottom-16 left-2 z-50 shadow-2xl">
+            <EmojiPicker 
+              onEmojiClick={(emojiData) => setNewMessage((prev) => prev + emojiData.emoji)} 
+              theme="dark" 
+              autoFocusSearch={false}
+              emojiStyle="native"
+            />
+          </div>
+        )}
+        <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className={`p-2 rounded-full transition-colors ${showEmojiPicker ? 'bg-[#2a3942] text-[#00a884]' : 'text-[#8696a0] hover:text-[#e9edef] hover:bg-[#2a3942]'}`}
+          >
+            <Smile className="w-6 h-6" />
+          </button>
           <input
             type="text"
             value={newMessage}
+            onFocus={() => setShowEmojiPicker(false)}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
             className="flex-1 bg-[#2a3942] text-[#d1d7db] rounded-lg h-[44px] px-4 focus:outline-none focus:ring-1 focus:ring-[#00a884] placeholder-[#8696a0]"

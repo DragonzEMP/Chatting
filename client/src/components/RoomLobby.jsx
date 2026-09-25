@@ -22,7 +22,7 @@ const RoomLobby = ({ onJoin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111b21] flex flex-col font-sans text-[#e9edef]">
+    <div className="min-h-[100dvh] bg-[#111b21] flex flex-col font-sans text-[#e9edef]">
       {/* Top Bar */}
       <header className="flex justify-between items-center p-4 bg-[#202c33] border-b border-[#2a3942]">
         <div className="flex items-center space-x-2">

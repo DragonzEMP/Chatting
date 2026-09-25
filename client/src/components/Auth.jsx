@@ -37,7 +37,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111b21] flex items-center justify-center p-4 font-sans text-[#e9edef]">
+    <div className="min-h-[100dvh] bg-[#111b21] flex items-center justify-center p-4 font-sans text-[#e9edef]">
       <div className="bg-[#202c33] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-[#2a3942]">
         
         {/* Header */}
