@@ -58,14 +58,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on('send_message', async (data) => {
-    const { roomId, senderId, senderDisplayName, content } = data;
+    const { roomId, senderId, senderDisplayName, content, replyTo } = data;
     try {
       const Message = require('./models/Message');
       const newMessage = await Message.create({
         roomId,
         senderId,
         senderDisplayName,
-        content
+        content,
+        replyTo
       });
       io.to(roomId).emit('receive_message', newMessage);
     } catch (err) {

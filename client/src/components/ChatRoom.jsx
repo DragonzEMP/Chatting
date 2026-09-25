@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Pencil, Check, Clock, Trash2, Send, Smile, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Pencil, Check, Clock, Trash2, Send, Smile, MessageCircle, X, Reply } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import EmojiPicker from 'emoji-picker-react';
@@ -10,16 +10,29 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(initialDisplayName);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
   
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [socket, setSocket] = useState(null);
   const messagesEndRef = useRef(null);
 
+  let touchStartX = useRef(0);
+
   const baseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
   const API_URL = `${baseUrl}/api`;
 
-  // Auto-scroll
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e, msg) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    if (touchEndX - touchStartX.current > 60) {
+      setReplyingTo(msg);
+    }
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -28,7 +41,6 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
     scrollToBottom();
   }, [messages]);
 
-  // Setup Socket and Fetch initial messages
   useEffect(() => {
     const socketUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? undefined : 'http://localhost:5000');
     const newSocket = io(socketUrl);
@@ -44,7 +56,6 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
       setMessages([]);
     });
 
-    // Fetch existing messages
     const fetchMessages = async () => {
       try {
         const res = await fetch(`${API_URL}/messages/${roomCode}`, {
@@ -66,7 +77,7 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
       newSocket.emit('leave_room', roomCode);
       newSocket.disconnect();
     };
-  }, [roomCode, token]);
+  }, [roomCode, token, API_URL]);
 
   const handleSaveName = () => {
     if (tempName.trim()) {
@@ -85,10 +96,16 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
       roomId: roomCode,
       senderId: user._id,
       senderDisplayName: displayName,
-      content: newMessage.trim()
+      content: newMessage.trim(),
+      replyTo: replyingTo ? {
+        messageId: replyingTo._id,
+        senderDisplayName: replyingTo.senderDisplayName,
+        content: replyingTo.content
+      } : null
     });
 
     setNewMessage('');
+    setReplyingTo(null);
   };
 
   const handleClearChat = async () => {
@@ -185,17 +202,39 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
         </div>
 
         {/* Message Bubbles */}
-        <div className="flex-1 flex flex-col space-y-2">
+        <div className="flex-1 flex flex-col space-y-2 overflow-x-hidden">
           {messages.map((msg, index) => {
             const isMine = msg.senderId === user._id;
             return (
-              <div key={msg._id || index} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] rounded-lg px-3 py-2 flex flex-col relative ${isMine ? 'bg-[#005c4b] text-[#e9edef] rounded-tr-sm' : 'bg-[#202c33] text-[#e9edef] rounded-tl-sm'}`}>
+              <div 
+                key={msg._id || index} 
+                className={`flex ${isMine ? 'justify-end' : 'justify-start'} group relative`}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, msg)}
+              >
+                
+                {/* Desktop Reply Hover Button */}
+                <button 
+                  onClick={() => setReplyingTo(msg)}
+                  className={`absolute ${isMine ? 'left-[-40px]' : 'right-[-40px]'} top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-[#8696a0] hover:text-[#e9edef] hidden md:block`}
+                  title="Reply"
+                >
+                  <Reply className="w-4 h-4" />
+                </button>
+
+                <div className={`max-w-[85%] sm:max-w-[75%] rounded-lg px-3 py-2 flex flex-col relative ${isMine ? 'bg-[#005c4b] text-[#e9edef] rounded-tr-sm' : 'bg-[#202c33] text-[#e9edef] rounded-tl-sm'}`}>
                   
                   {!isMine && (
                     <span className="text-[13px] font-semibold text-[#53bdeb] mb-0.5">
                       {msg.senderDisplayName}
                     </span>
+                  )}
+
+                  {msg.replyTo && (
+                    <div className={`mb-1 p-2 rounded bg-black/20 border-l-4 ${isMine ? 'border-[#53bdeb]' : 'border-[#00a884]'} text-xs overflow-hidden flex flex-col`}>
+                      <span className={`font-semibold ${isMine ? 'text-[#53bdeb]' : 'text-[#00a884]'}`}>{msg.replyTo.senderDisplayName}</span>
+                      <span className="text-white/70 whitespace-nowrap overflow-hidden text-ellipsis">{msg.replyTo.content}</span>
+                    </div>
                   )}
                   
                   <div className="flex flex-wrap items-end gap-2">
@@ -218,9 +257,23 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
       </main>
 
       {/* Input Area */}
-      <footer className="p-3 bg-[#202c33] relative">
+      <footer className="bg-[#202c33] flex flex-col relative">
+        
+        {/* Replying To Preview Box */}
+        {replyingTo && (
+          <div className="bg-[#202c33] px-3 pt-3 flex items-center justify-center">
+             <div className="flex-1 bg-[#2a3942] rounded-lg p-2 border-l-4 border-[#00a884] relative flex flex-col">
+                <span className="text-[#00a884] font-semibold text-xs mb-0.5">{replyingTo.senderDisplayName}</span>
+                <span className="text-[#8696a0] text-xs whitespace-nowrap overflow-hidden text-ellipsis pr-6">{replyingTo.content}</span>
+                <button onClick={() => setReplyingTo(null)} className="absolute top-1/2 -translate-y-1/2 right-2 text-[#8696a0] hover:text-[#e9edef] p-1">
+                  <X className="w-4 h-4" />
+                </button>
+             </div>
+          </div>
+        )}
+
         {showEmojiPicker && (
-          <div className="absolute bottom-16 left-2 z-50 shadow-2xl">
+          <div className="absolute bottom-[70px] left-2 z-50 shadow-2xl">
             <EmojiPicker 
               onEmojiClick={(emojiData) => setNewMessage((prev) => prev + emojiData.emoji)} 
               theme="dark" 
@@ -229,7 +282,7 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
             />
           </div>
         )}
-        <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+        <form onSubmit={handleSendMessage} className="flex items-center space-x-2 p-3">
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
