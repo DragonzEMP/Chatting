@@ -8,7 +8,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
-  const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api`;
+  
+  const baseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+  const API_URL = `${baseUrl}/api`;
 
   useEffect(() => {
     const verifyUser = async () => {

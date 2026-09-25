@@ -25,6 +25,13 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 
+// Serve frontend in production
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../client/dist')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
 // Socket.io Setup
 const io = new Server(server, {
   cors: {

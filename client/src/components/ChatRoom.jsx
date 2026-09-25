@@ -14,7 +14,8 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
   const [socket, setSocket] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api`;
+  const baseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+  const API_URL = `${baseUrl}/api`;
 
   // Auto-scroll
   const scrollToBottom = () => {
@@ -27,7 +28,8 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
 
   // Setup Socket and Fetch initial messages
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+    const socketUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? undefined : 'http://localhost:5000');
+    const newSocket = io(socketUrl);
     setSocket(newSocket);
 
     newSocket.emit('join_room', roomCode);
