@@ -45,7 +45,7 @@ const Auth = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#111b21] mb-4">
             <MessageCircle className="w-8 h-8 text-[#00a884]" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Ephemeral Chat</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Secret Gossip</h1>
           <p className="text-[#8696a0] text-sm">
             {isLogin ? 'Welcome back. Sign in to continue.' : 'Join the conversation today.'}
           </p>
@@ -125,18 +125,21 @@ const Auth = () => {
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-[#2a3942] text-center text-sm text-[#8696a0]">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError('');
-              }}
-              className="text-[#00a884] font-semibold hover:text-[#00c59a] hover:underline focus:outline-none transition-colors"
-            >
-              {isLogin ? 'Create one' : 'Log in here'}
-            </button>
+          <div className="mt-8 pt-6 border-t border-[#2a3942] flex flex-col items-center">
+            <div className="text-sm text-[#8696a0] mb-4">
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError('');
+                }}
+                className="text-[#00a884] font-semibold hover:text-[#00c59a] hover:underline focus:outline-none transition-colors"
+              >
+                {isLogin ? 'Create one' : 'Log in here'}
+              </button>
+            </div>
+            <p className="text-xs text-[#8696a0] font-medium tracking-wide">&copy; {new Date().getFullYear()} DragonzEMP</p>
           </div>
         </div>
       </div>

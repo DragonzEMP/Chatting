@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Pencil, Check, Clock, Trash2, Send, Smile } from 'lucide-react';
+import { ArrowLeft, Pencil, Check, Clock, Trash2, Send, Smile, MessageCircle } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import EmojiPicker from 'emoji-picker-react';
@@ -115,7 +115,7 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
   return (
     <div className="flex flex-col h-[100dvh] bg-[#0b141a] font-sans text-[#e9edef] overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between p-3 bg-[#202c33] border-b border-[#2a3942] sticky top-0 z-10 shadow-sm">
+      <header className="flex items-center justify-between p-3 bg-[#202c33] border-b border-[#2a3942] sticky top-0 z-10 shadow-sm relative">
         <div className="flex items-center space-x-4">
           <button
             onClick={onLeave}
@@ -154,6 +154,12 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Logo in Top Bar */}
+        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center space-x-2 pointer-events-none">
+           <MessageCircle className="w-5 h-5 text-[#00a884]" />
+           <span className="font-bold text-[#e9edef] tracking-wide">Secret Gossip</span>
         </div>
 
         <button
@@ -203,6 +209,11 @@ const ChatRoom = ({ roomCode, initialDisplayName, onLeave }) => {
             );
           })}
           <div ref={messagesEndRef} />
+        </div>
+        
+        {/* Copyright inside chat */}
+        <div className="mt-8 mb-2 flex justify-center w-full">
+           <span className="text-[10px] text-[#8696a0]/50 tracking-wider uppercase">&copy; {new Date().getFullYear()} DragonzEMP</span>
         </div>
       </main>
 

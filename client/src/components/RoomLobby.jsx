@@ -24,12 +24,19 @@ const RoomLobby = ({ onJoin }) => {
   return (
     <div className="min-h-[100dvh] bg-[#111b21] flex flex-col font-sans text-[#e9edef]">
       {/* Top Bar */}
-      <header className="flex justify-between items-center p-4 bg-[#202c33] border-b border-[#2a3942]">
+      <header className="flex justify-between items-center p-4 bg-[#202c33] border-b border-[#2a3942] shadow-sm relative">
         <div className="flex items-center space-x-2">
           <div className="bg-[#00a884] text-[#111b21] px-3 py-1 rounded-full text-sm font-bold shadow-sm">
             {user?.username}
           </div>
         </div>
+        
+        {/* Logo in Top Bar */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
+           <MessageCircle className="w-6 h-6 text-[#00a884]" />
+           <span className="font-bold text-white tracking-wide hidden sm:inline-block">Secret Gossip</span>
+        </div>
+
         <button
           onClick={logout}
           className="flex items-center text-[#8696a0] hover:text-[#e9edef] transition-colors p-2 rounded-lg hover:bg-[#2a3942]"
@@ -41,7 +48,7 @@ const RoomLobby = ({ onJoin }) => {
 
       {/* Center Content */}
       <main className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-[#202c33] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-[#2a3942]">
+        <div className="bg-[#202c33] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-[#2a3942] flex flex-col">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#111b21] mb-4 shadow-inner">
               <DoorOpen className="w-8 h-8 text-[#00a884]" />
@@ -95,6 +102,10 @@ const RoomLobby = ({ onJoin }) => {
               Enter Room
             </button>
           </form>
+          
+          <div className="mt-8 text-center">
+             <p className="text-xs text-[#8696a0] font-medium tracking-wide">&copy; {new Date().getFullYear()} DragonzEMP</p>
+          </div>
         </div>
       </main>
     </div>
