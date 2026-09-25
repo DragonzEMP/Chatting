@@ -63,16 +63,21 @@ router.post('/login', async (req, res) => {
       $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
     });
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      res.json({
-        _id: user.id,
-        username: user.username,
-        email: user.email,
-        token: generateToken(user.id, user.username),
-      });
-    } else {
-      res.status(401).json({ message: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ message: 'Account not found. Please create a new account.' });
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Incorrect password. Forgot it? Create a new account.' });
+    }
+
+    res.json({
+      _id: user.id,
+      username: user.username,
+      email: user.email,
+      token: generateToken(user.id, user.username),
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

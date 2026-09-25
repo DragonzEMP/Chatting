@@ -101,7 +101,21 @@ const Auth = () => {
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-[#8696a0] uppercase tracking-wider mb-2">Password</label>
+              <div className="flex justify-between items-end mb-2">
+                <label className="block text-xs font-semibold text-[#8696a0] uppercase tracking-wider">Password</label>
+                {isLogin && (
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setIsLogin(false);
+                      setError('No worries! Since this is an ephemeral chat, you can simply create a new ID right now.');
+                    }}
+                    className="text-xs text-[#00a884] hover:text-[#00c59a] hover:underline transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <input
                 type="password"
                 required
